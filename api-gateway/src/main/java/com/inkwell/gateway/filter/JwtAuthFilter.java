@@ -44,12 +44,14 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
         return (exchange, chain) -> {
             String path = exchange.getRequest().getURI().getPath();
 
-            // Allow open endpoints
-            boolean isOpen = OPEN_ENDPOINTS.stream().anyMatch(path::startsWith);
-            if (isOpen && exchange.getRequest().getMethod().name().equals("GET")) {
+            // 1. Check if it's an explicit open endpoint (public GET or specific public POST)
+            boolean isOpen = OPEN_ENDPOINTS.stream().anyMatch(path::equals);
+            if (isOpen) {
                 return chain.filter(exchange);
             }
-            if (path.startsWith("/api/auth/") || path.startsWith("/ws/")) {
+
+            // 2. Allow Websocket connections (auth handled via handshake)
+            if (path.startsWith("/ws/")) {
                 return chain.filter(exchange);
             }
 

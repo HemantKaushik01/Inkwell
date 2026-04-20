@@ -10,7 +10,9 @@ com\inkwell\auth\controller\AuthController.class
 com\inkwell\auth\dto\RegisterRequest.class
 com\inkwell\auth\security\JwtTokenProvider.class
 com\inkwell\auth\service\AuthService.class
+com\inkwell\auth\exception\GlobalExceptionHandler.class
 com\inkwell\auth\entity\User$UserBuilder.class
+com\inkwell\auth\security\GatewayHeaderFilter.class
 com\inkwell\auth\service\AuthServiceImpl.class
 com\inkwell\auth\entity\User$Role.class
 com\inkwell\auth\security\SecurityConfig.class

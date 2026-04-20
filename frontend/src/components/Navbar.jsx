@@ -85,10 +85,12 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-              <div className="nav-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-bg)', padding: '0.4rem 0.8rem', borderRadius: '2rem', border: '1px solid var(--color-border)' }}>
-                <UserIcon size={16} />
-                <span>{user.username || user.name}</span>
-              </div>
+              <Link to="/profile" className="nav-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-bg)', padding: '0.4rem 1.1rem', borderRadius: '2rem', border: '1px solid var(--color-border)', cursor: 'pointer', transition: 'all 0.2s ease' }} onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--color-text)'} onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}>
+                  <UserIcon size={16} />
+                  <span style={{ fontWeight: 600 }}>{user.username || user.name}</span>
+                </div>
+              </Link>
               <button onClick={handleLogout} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <LogOut size={16} /> Logout
               </button>

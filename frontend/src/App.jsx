@@ -8,6 +8,7 @@ import CreatePost from './pages/CreatePost';
 import MyPosts from './pages/MyPosts';
 import EditPost from './pages/EditPost';
 import Notifications from './pages/Notifications';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/my-stories" element={<MyPosts />} />
             <Route path="/edit/:id" element={<EditPost />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
       </div>

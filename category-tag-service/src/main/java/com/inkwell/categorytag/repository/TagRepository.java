@@ -1,6 +1,7 @@
 package com.inkwell.categorytag.repository;
 
 import com.inkwell.categorytag.entity.Tag;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,5 +25,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         return findTrendingTags(PageRequest.of(0, limit));
     }
     
-    Optional<Tag> findByTagId(Long id); // Alias for findById
+    default Optional<Tag> findByTagId(Long id) {
+        return findById(id);
+    }
 }
