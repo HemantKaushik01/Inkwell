@@ -10,6 +10,7 @@ com\inkwell\categorytag\entity\Tag$TagBuilder.class
 com\inkwell\categorytag\repository\PostTagRepository.class
 com\inkwell\categorytag\entity\Category$CategoryBuilder.class
 com\inkwell\categorytag\service\TagService.class
+com\inkwell\categorytag\config\TagSeeder.class
 com\inkwell\categorytag\entity\Tag.class
 com\inkwell\categorytag\config\CategorySeeder.class
 com\inkwell\categorytag\service\CategoryService.class

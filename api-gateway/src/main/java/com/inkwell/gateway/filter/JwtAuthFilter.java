@@ -44,14 +44,16 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
         return (exchange, chain) -> {
             String path = exchange.getRequest().getURI().getPath();
 
-            // 1. Check if it's an explicit open endpoint (public GET or specific public POST)
-            boolean isOpen = OPEN_ENDPOINTS.stream().anyMatch(path::equals);
-            if (isOpen) {
-                return chain.filter(exchange);
-            }
+            // Allow open endpoints (like login/register)
+            boolean isPublicEndpoint = OPEN_ENDPOINTS.stream().anyMatch(path::startsWith);
+            
+            // Allow all GET requests to public categories (posts, users/authors, cats, tags, comments)
+            boolean isPublicGet = exchange.getRequest().getMethod().name().equals("GET") && 
+                (path.startsWith("/api/posts") || path.startsWith("/api/users") || 
+                 path.startsWith("/api/categories") || path.startsWith("/api/tags") ||
+                 path.startsWith("/api/comments"));
 
-            // 2. Allow Websocket connections (auth handled via handshake)
-            if (path.startsWith("/ws/")) {
+            if (isPublicEndpoint || isPublicGet || path.startsWith("/ws/")) {
                 return chain.filter(exchange);
             }
 

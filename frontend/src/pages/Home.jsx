@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Eye, Heart } from 'lucide-react';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [trendingPosts, setTrendingPosts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -133,7 +134,13 @@ export default function Home() {
               />
               <button type="submit" style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', fontWeight: '700' }}>Search</button>
             </form>
-            <Link to="/login?mode=signup" className="btn btn-primary" style={{ borderRadius: '2rem', padding: '0.8rem 2.5rem' }}>Start reading</Link>
+            <button 
+              onClick={() => document.getElementById('articles').scrollIntoView({ behavior: 'smooth' })} 
+              className="btn btn-primary" 
+              style={{ borderRadius: '2rem', padding: '0.8rem 2.5rem' }}
+            >
+              Start reading
+            </button>
           </div>
         </div>
       </section>
@@ -165,21 +172,24 @@ export default function Home() {
             </button>
           ))}
           <button 
-            onClick={() => handleCategoryFilter(null)}
+            onClick={() => {
+              handleCategoryFilter(null);
+              setSelectedTag(null);
+            }}
             style={{ 
               whiteSpace: 'nowrap', 
               padding: '0.4rem 1.2rem', 
               borderRadius: '2rem', 
               fontSize: '0.85rem',
               fontWeight: '500',
-              backgroundColor: !selectedCategory ? 'var(--color-primary)' : 'transparent',
-              color: !selectedCategory ? 'white' : 'var(--color-text-secondary)',
-              border: '1px solid ' + (!selectedCategory ? 'var(--color-primary)' : 'var(--color-border)'),
+              backgroundColor: !selectedCategory && !selectedTag ? 'var(--color-primary)' : 'transparent',
+              color: !selectedCategory && !selectedTag ? 'white' : 'var(--color-text-secondary)',
+              border: '1px solid ' + (!selectedCategory && !selectedTag ? 'var(--color-primary)' : 'var(--color-border)'),
               cursor: 'pointer',
               marginLeft: 'auto'
             }}
           >
-            All Categories
+            All Stories
           </button>
         </div>
       </div>
@@ -195,24 +205,36 @@ export default function Home() {
           </div>
           <div className="post-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))' }}>
             {trendingPosts.map((post, i) => (
-              <Link to={`/post/${post.slug}`} key={post.id} style={{ display: 'flex', gap: '1.5rem', textDecoration: 'none' }}>
+              <div 
+                key={post.id} 
+                onClick={() => navigate(`/post/${post.slug}`)}
+                style={{ display: 'flex', gap: '1.5rem', cursor: 'pointer' }}
+              >
                 <span style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--color-border)', flexShrink: 0 }}>0{i+1}</span>
                 <div>
                   <div className="post-meta" style={{ marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>{post.authorName}</span>
+                    <Link 
+                      to={`/author/${post.authorId}`} 
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ fontWeight: 600, color: 'var(--color-text)', textDecoration: 'none' }} 
+                      onMouseOver={(e) => e.target.style.textDecoration='underline'} 
+                      onMouseOut={(e) => e.target.style.textDecoration='none'}
+                    >
+                      {post.authorName}
+                    </Link>
                   </div>
                   <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', fontWeight: 700 }}>{post.title}</h4>
                   <div className="post-meta">
                     <span>{new Date(post.publishedAt || post.createdAt).toLocaleDateString()} • {post.readTime} min read</span>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      <div className="container section" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '4rem' }}>
+      <div id="articles" className="container section" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '4rem' }}>
         <div>
           <div className="section-title">
             <h2>Latest Articles</h2>
@@ -223,13 +245,25 @@ export default function Home() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
               {posts.length > 0 ? posts.map(post => (
-                <Link to={`/post/${post.slug}`} key={post.id} style={{ display: 'grid', gridTemplateColumns: post.coverImageUrl ? '1fr 2fr' : '1fr', gap: '2rem', textDecoration: 'none' }}>
+                <div 
+                  key={post.id} 
+                  onClick={() => navigate(`/post/${post.slug}`)}
+                  style={{ display: 'grid', gridTemplateColumns: post.coverImageUrl ? '1fr 2fr' : '1fr', gap: '2rem', cursor: 'pointer' }}
+                >
                   {post.coverImageUrl && (
                     <img src={post.coverImageUrl} alt={post.title} style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                   )}
                   <div>
                     <div className="post-meta">
-                      <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>{post.authorName}</span>
+                      <Link 
+                        to={`/author/${post.authorId}`} 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ fontWeight: 600, color: 'var(--color-text)', textDecoration: 'none' }} 
+                        onMouseOver={(e) => e.target.style.textDecoration='underline'} 
+                        onMouseOut={(e) => e.target.style.textDecoration='none'}
+                      >
+                        {post.authorName}
+                      </Link>
                       <span>•</span>
                       <span>{new Date(post.publishedAt || post.createdAt).toLocaleDateString()}</span>
                     </div>
@@ -251,7 +285,7 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               )) : (
                 <p>No posts available yet. Check back soon!</p>
               )}

@@ -30,6 +30,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findFeaturedPosts();
 
     Page<Post> findByCategoryIdAndStatus(Long categoryId, Post.PostStatus status, Pageable pageable);
+    
+    @Query("SELECT p FROM Post p JOIN p.tags t WHERE t = :tag AND p.status = 'PUBLISHED'")
+    Page<Post> findByTag(@Param("tag") String tag, Pageable pageable);
 
     long countByAuthorId(Long authorId);
     long countByStatus(Post.PostStatus status);

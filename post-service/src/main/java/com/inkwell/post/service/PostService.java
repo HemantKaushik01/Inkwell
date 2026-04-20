@@ -24,5 +24,6 @@ public interface PostService {
     PostDto updateStatus(Long postId, Long userId, String userRole, String status);
     PostDto featurePost(Long postId, boolean featured);
     Page<PostDto> getPostsByCategory(Long categoryId, Pageable pageable);
+    Page<PostDto> getPostsByTag(String tag, Pageable pageable);
     long countByAuthor(Long authorId);
 }

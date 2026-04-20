@@ -200,6 +200,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<PostDto> getPostsByTag(String tag, Pageable pageable) {
+        return postRepository.findByTag(tag, pageable)
+                .map(PostDto::fromEntity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public long countByAuthor(Long authorId) {
         return postRepository.countByAuthorId(authorId);
     }

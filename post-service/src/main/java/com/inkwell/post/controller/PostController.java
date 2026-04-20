@@ -80,6 +80,14 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostsByCategory(categoryId, PageRequest.of(page, size)));
     }
 
+    @GetMapping("/api/posts/tag/{tag}")
+    public ResponseEntity<Page<PostDto>> getPostsByTag(
+            @PathVariable String tag,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(postService.getPostsByTag(tag, PageRequest.of(page, size)));
+    }
+
     @PutMapping("/api/posts/{id}")
     public ResponseEntity<PostDto> updatePost(
             @PathVariable Long id,

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus, UserCheck, Heart, Eye, Edit, Trash2, ThumbsUp, Check, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 export default function PostDetail() {
   const { slug } = useParams();
@@ -108,10 +107,14 @@ export default function PostDetail() {
             <div className="article-author">
               <div className="author-avatar"></div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                   <strong>{post.authorName}</strong>
-                   {post.authorId !== user?.id && (
-                     <button onClick={handleFollowToggle} className={`btn btn-sm ${isFollowing ? 'btn-outline' : 'btn-primary'}`} style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                   <Link to={`/author/${post.authorId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                     <strong style={{ fontSize: '1.1rem', cursor: 'pointer' }} onMouseOver={(e) => e.target.style.textDecoration='underline'} onMouseOut={(e) => e.target.style.textDecoration='none'}>
+                       {post.authorName}
+                     </strong>
+                   </Link>
+                   {user && post.authorId !== user?.id && (
+                     <button onClick={handleFollowToggle} className={`btn btn-sm ${isFollowing ? 'btn-outline' : 'btn-primary'}`} style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '2rem' }}>
                        {isFollowing ? <><UserCheck size={14}/> Following</> : <><UserPlus size={14}/> Follow</>}
                      </button>
                    )}

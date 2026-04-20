@@ -47,6 +47,7 @@ export default function Navbar() {
       <div className="container navbar-content">
         <Link to="/" className="nav-brand">InkWell.</Link>
         <div className="nav-links">
+          <Link to="/" className="nav-item">Home</Link>
           <a href="#newsletter" className="nav-item flex items-center gap-1">
             <Bell size={16} /> Subscribe
           </a>
