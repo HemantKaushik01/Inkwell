@@ -1,0 +1,14 @@
+com\inkwell\post\service\PostService.class
+com\inkwell\post\dto\PostDto.class
+com\inkwell\post\controller\PostController.class
+com\inkwell\post\entity\Post$PostStatus.class
+com\inkwell\post\dto\PostDto$PostDtoBuilder.class
+com\inkwell\post\PostServiceApplication.class
+com\inkwell\post\client\NotificationServiceClient.class
+com\inkwell\post\repository\PostRepository.class
+com\inkwell\post\entity\Post$PostBuilder.class
+com\inkwell\post\dto\CreatePostRequest.class
+com\inkwell\post\service\PostServiceImpl.class
+com\inkwell\post\entity\Post.class
+com\inkwell\post\security\SecurityConfig.class
+com\inkwell\post\client\AuthServiceClient.class

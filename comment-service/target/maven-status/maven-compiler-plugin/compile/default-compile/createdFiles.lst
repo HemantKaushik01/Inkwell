@@ -1,0 +1,14 @@
+com\inkwell\comment\entity\Comment$CommentStatus.class
+com\inkwell\comment\service\CommentService.class
+com\inkwell\comment\client\PostServiceClient.class
+com\inkwell\comment\dto\CommentDto.class
+com\inkwell\comment\client\NotificationServiceClient.class
+com\inkwell\comment\CommentServiceApplication.class
+com\inkwell\comment\dto\AddCommentRequest.class
+com\inkwell\comment\repository\CommentRepository.class
+com\inkwell\comment\entity\Comment$CommentBuilder.class
+com\inkwell\comment\dto\CommentDto$CommentDtoBuilder.class
+com\inkwell\comment\entity\Comment.class
+com\inkwell\comment\security\SecurityConfig.class
+com\inkwell\comment\service\CommentServiceImpl.class
+com\inkwell\comment\controller\CommentController.class

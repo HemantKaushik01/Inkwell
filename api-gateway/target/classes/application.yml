@@ -1,0 +1,86 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**, /api/users/**, /api/admin/users/**
+          filters:
+            - JwtAuthFilter
+
+        - id: post-service
+          uri: lb://post-service
+          predicates:
+            - Path=/api/posts/**, /api/admin/posts/**
+          filters:
+            - JwtAuthFilter
+
+        - id: comment-service
+          uri: lb://comment-service
+          predicates:
+            - Path=/api/comments/**, /api/admin/comments/**
+          filters:
+            - JwtAuthFilter
+
+        - id: category-tag-service
+          uri: lb://category-tag-service
+          predicates:
+            - Path=/api/categories/**, /api/tags/**
+          filters:
+            - JwtAuthFilter
+
+        - id: media-service
+          uri: lb://media-service
+          predicates:
+            - Path=/api/media/**
+          filters:
+            - JwtAuthFilter
+
+        - id: newsletter-service
+          uri: lb://newsletter-service
+          predicates:
+            - Path=/api/newsletter/**, /api/admin/newsletter/**
+          filters:
+            - JwtAuthFilter
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**, /ws/**
+          filters:
+            - JwtAuthFilter
+
+        - id: analytics-service
+          uri: lb://analytics-service
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - JwtAuthFilter
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: inkwell-super-secret-jwt-key-must-be-256-bits-long-here
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG

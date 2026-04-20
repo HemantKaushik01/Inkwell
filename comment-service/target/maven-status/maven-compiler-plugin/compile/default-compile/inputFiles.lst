@@ -1,0 +1,11 @@
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\controller\CommentController.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\dto\CommentDto.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\repository\CommentRepository.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\security\SecurityConfig.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\CommentServiceApplication.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\client\PostServiceClient.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\service\CommentService.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\client\NotificationServiceClient.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\entity\Comment.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\service\CommentServiceImpl.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\dto\AddCommentRequest.java

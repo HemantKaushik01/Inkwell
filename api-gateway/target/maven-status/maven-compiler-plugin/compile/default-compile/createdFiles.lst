@@ -1,0 +1,3 @@
+com\inkwell\gateway\filter\JwtAuthFilter$Config.class
+com\inkwell\gateway\filter\JwtAuthFilter.class
+com\inkwell\gateway\ApiGatewayApplication.class

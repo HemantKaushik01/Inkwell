@@ -1,0 +1,11 @@
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\entity\Post.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\security\SecurityConfig.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\service\PostServiceImpl.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\client\AuthServiceClient.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\dto\CreatePostRequest.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\PostServiceApplication.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\dto\PostDto.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\repository\PostRepository.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\client\NotificationServiceClient.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\controller\PostController.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\service\PostService.java
