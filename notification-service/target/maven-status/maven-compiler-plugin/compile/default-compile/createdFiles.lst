@@ -1,0 +1,8 @@
+com\inkwell\notification\entity\Notification.class
+com\inkwell\notification\config\WebSocketConfig.class
+com\inkwell\notification\controller\NotificationController.class
+com\inkwell\notification\security\SecurityConfig.class
+com\inkwell\notification\NotificationServiceApplication.class
+com\inkwell\notification\repository\NotificationRepository.class
+com\inkwell\notification\entity\Notification$NotificationBuilder.class
+com\inkwell\notification\service\NotificationService.class
