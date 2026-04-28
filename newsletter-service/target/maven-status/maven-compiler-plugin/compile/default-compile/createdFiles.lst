@@ -1,0 +1,7 @@
+com\inkwell\newsletter\repository\SubscriberRepository.class
+com\inkwell\newsletter\service\NewsletterService.class
+com\inkwell\newsletter\entity\Subscriber$SubscriberBuilder.class
+com\inkwell\newsletter\NewsletterServiceApplication.class
+com\inkwell\newsletter\security\SecurityConfig.class
+com\inkwell\newsletter\entity\Subscriber.class
+com\inkwell\newsletter\controller\NewsletterController.class
