@@ -222,6 +222,37 @@ public class AuthServiceImpl implements AuthService {
             .orElseThrow(() -> new RuntimeException("User not found")));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void changeUserRole(Long userId, String role) {
+        User user = findById(userId);
+        user.setRole(User.Role.valueOf(role.toUpperCase()));
+        userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        User user = findById(userId);
+        
+        // Disconnect from followers to avoid constraint violations
+        for (User follower : user.getFollowers()) {
+            follower.getFollowing().remove(user);
+            userRepository.save(follower);
+        }
+        
+        // Also clear following simply for consistency
+        user.getFollowing().clear();
+        
+        userRepository.delete(user);
+    }
+
     private User findById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));

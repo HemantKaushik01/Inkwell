@@ -24,10 +24,10 @@ public class PostController {
     @PostMapping("/api/posts")
     public ResponseEntity<PostDto> createPost(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestHeader("X-User-Email") String userEmail,
+            @RequestHeader(value = "X-User-Email", required = false, defaultValue = "") String userEmail,
             @RequestHeader(value = "X-User-Name", required = false) String userName,
             @Valid @RequestBody CreatePostRequest request) {
-        String authorName = userName != null ? userName : userEmail;
+        String authorName = userName != null ? userName : (userEmail.isEmpty() ? "Unknown" : userEmail);
         return ResponseEntity.ok(postService.createPost(userId, authorName, request));
     }
 
@@ -122,9 +122,23 @@ public class PostController {
     }
 
     @PostMapping("/api/posts/{id}/likes")
-    public ResponseEntity<Void> incrementLikes(@PathVariable Long id) {
-        postService.incrementLikeCount(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PostDto> toggleLike(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(postService.toggleLike(id, userId));
+    }
+
+    @GetMapping("/api/posts/{id}/liked")
+    public ResponseEntity<Boolean> hasUserLiked(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.ok(false);
+        }
+        return ResponseEntity.ok(postService.hasUserLiked(id, userId));
     }
 
     // Admin endpoints

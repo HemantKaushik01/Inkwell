@@ -114,4 +114,25 @@ public class CommentController {
             @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(commentService.updateCommentStatus(id, userRole, body.get("status")));
     }
+
+    @PutMapping("/api/admin/comments/moderation")
+    public ResponseEntity<Map<String, Object>> toggleModeration(
+            @RequestHeader(value = "X-User-Role", defaultValue = "READER") String userRole,
+            @RequestBody Map<String, Boolean> body) {
+        boolean required = body.getOrDefault("required", false);
+        commentService.setModerationRequired(required, userRole);
+        return ResponseEntity.ok(Map.of(
+                "message", "Moderation mode " + (required ? "enabled" : "disabled"),
+                "moderationRequired", required
+        ));
+    }
+
+    @GetMapping("/api/admin/comments/moderation")
+    public ResponseEntity<Map<String, Boolean>> getModerationStatus(
+            @RequestHeader(value = "X-User-Role", defaultValue = "READER") String userRole) {
+        if (!"ADMIN".equals(userRole)) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(Map.of("moderationRequired", commentService.isModerationRequired()));
+    }
 }

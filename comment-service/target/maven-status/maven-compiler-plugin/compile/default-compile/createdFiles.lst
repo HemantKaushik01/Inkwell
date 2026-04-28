@@ -9,6 +9,9 @@ com\inkwell\comment\repository\CommentRepository.class
 com\inkwell\comment\entity\Comment$CommentBuilder.class
 com\inkwell\comment\dto\CommentDto$CommentDtoBuilder.class
 com\inkwell\comment\entity\Comment.class
+com\inkwell\comment\entity\CommentConfig.class
+com\inkwell\comment\repository\CommentConfigRepository.class
+com\inkwell\comment\entity\CommentConfig$CommentConfigBuilder.class
 com\inkwell\comment\security\SecurityConfig.class
 com\inkwell\comment\service\CommentServiceImpl.class
 com\inkwell\comment\controller\CommentController.class

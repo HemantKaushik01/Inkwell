@@ -5,6 +5,8 @@ import com.inkwell.post.client.NotificationServiceClient;
 import com.inkwell.post.dto.CreatePostRequest;
 import com.inkwell.post.dto.PostDto;
 import com.inkwell.post.entity.Post;
+import com.inkwell.post.entity.PostLike;
+import com.inkwell.post.repository.PostLikeRepository;
 import com.inkwell.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
     private final AuthServiceClient authServiceClient;
     private final NotificationServiceClient notificationServiceClient;
 
@@ -164,11 +167,30 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void incrementLikeCount(Long postId) {
-        if (!postRepository.existsById(postId)) {
-            throw new RuntimeException("Post not found: " + postId);
+    public PostDto toggleLike(Long postId, Long userId) {
+        Post post = findById(postId);
+        boolean alreadyLiked = postLikeRepository.existsByPostIdAndUserId(postId, userId);
+        if (alreadyLiked) {
+            // Dislike: remove the record and decrement
+            postLikeRepository.findByPostIdAndUserId(postId, userId)
+                    .ifPresent(postLikeRepository::delete);
+            long newCount = Math.max(0, post.getLikeCount() - 1);
+            post.setLikeCount(newCount);
+        } else {
+            // Like: create record and increment
+            PostLike like = PostLike.builder().postId(postId).userId(userId).build();
+            postLikeRepository.save(like);
+            post.setLikeCount(post.getLikeCount() + 1);
         }
-        postRepository.incrementLikeCount(postId);
+        Post saved = postRepository.save(post);
+        PostDto dto = PostDto.fromEntity(saved);
+        dto.setLikedByCurrentUser(!alreadyLiked);
+        return dto;
+    }
+
+    @Override
+    public boolean hasUserLiked(Long postId, Long userId) {
+        return postLikeRepository.existsByPostIdAndUserId(postId, userId);
     }
 
     @Override

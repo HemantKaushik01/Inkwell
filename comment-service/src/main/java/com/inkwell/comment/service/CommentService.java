@@ -19,4 +19,6 @@ public interface CommentService {
     CommentDto unlikeComment(Long id);
     long getCommentCount(Long postId);
     CommentDto updateCommentStatus(Long commentId, String userRole, String status); // Keep legacy for compatibility or replace
+    void setModerationRequired(boolean required, String userRole);
+    boolean isModerationRequired();
 }

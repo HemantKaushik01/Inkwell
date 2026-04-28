@@ -2,74 +2,50 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import PostForm from '../components/PostForm';
 
 export default function EditPost() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+  const toast = useToast();
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const res = await api.get(`/posts/${id}`);
-        const post = res.data;
-        
-        // Ownership check
-        if (post.authorId !== user?.id && user?.role !== 'ADMIN') {
-          navigate('/');
-          return;
-        }
-        
-        setInitialData(post);
-      } catch (err) {
-        console.error(err);
-        setError('Post not found');
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (user) fetchPost();
-  }, [id, user, navigate]);
+    if (!user) return;
+    api.get(`/posts/${id}`).then(res => {
+      const post = res.data;
+      if (post.authorId !== user?.id && user?.role !== 'ADMIN') { navigate('/'); return; }
+      setInitialData(post);
+    }).catch(() => toast.error('Post not found.'))
+    .finally(() => setLoading(false));
+  }, [id, user]);
 
   const handleUpdate = async (payload) => {
     setSubmitting(true);
-    setError('');
     try {
       const res = await api.put(`/posts/${id}`, payload);
+      toast.success('Story updated successfully!');
       navigate(`/post/${res.data.slug}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update post.');
-    } finally {
-      setSubmitting(false);
-    }
+      toast.error(err.response?.data?.message || 'Failed to update post.');
+    } finally { setSubmitting(false); }
   };
 
-  if (loading) return <div className="loader"><div className="spinner"></div></div>;
-  if (error && !initialData) return <div className="container section">{error}</div>;
+  if (loading) return <div className="loader"><div className="spinner" /></div>;
+  if (!initialData) return <div className="container section" style={{ textAlign: 'center' }}><h2>Post not found</h2></div>;
 
   return (
-    <div className="container section animate-fade-in">
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '3rem', marginBottom: '1rem' }}>Edit your story</h1>
-          <p style={{ color: 'var(--color-text-secondary)' }}>Refine your words and polish your ideas.</p>
-        </div>
-
-        {error && <div className="error-message">{error}</div>}
-
-        <PostForm 
-          initialData={initialData} 
-          onSubmit={handleUpdate} 
-          loading={submitting} 
-          btnText="Update Story" 
-        />
-      </div>
+    <div className="animate-fade-in">
+      <PostForm
+        initialData={initialData}
+        onSubmit={handleUpdate}
+        loading={submitting}
+        btnText="Save Changes"
+      />
     </div>
   );
 }

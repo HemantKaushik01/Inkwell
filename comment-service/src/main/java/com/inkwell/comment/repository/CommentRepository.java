@@ -16,7 +16,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     
     List<Comment> findByParentCommentIdAndStatusNot(Long parentCommentId, Comment.CommentStatus status);
     
-    List<Comment> findByAuthorId(Long authorId);
+    List<Comment> findByUserId(Long userId);
     
     List<Comment> findByPostId(Long postId);
     
@@ -32,4 +32,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Modifying
     @Query("UPDATE Comment c SET c.status = 'DELETED' WHERE c.id = :commentId")
     void deleteByCommentId(Long commentId);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.likesCount = c.likesCount + 1 WHERE c.id = :id")
+    void incrementLikes(@org.springframework.data.repository.query.Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.likesCount = GREATEST(c.likesCount - 1, 0) WHERE c.id = :id")
+    void decrementLikes(@org.springframework.data.repository.query.Param("id") Long id);
 }

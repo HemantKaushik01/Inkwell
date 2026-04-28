@@ -20,7 +20,8 @@ public interface PostService {
     List<PostDto> getFeaturedPosts();
     List<PostDto> getTrendingPosts();
     void incrementViewCount(Long postId);
-    void incrementLikeCount(Long postId);
+    PostDto toggleLike(Long postId, Long userId);
+    boolean hasUserLiked(Long postId, Long userId);
     PostDto updateStatus(Long postId, Long userId, String userRole, String status);
     PostDto featurePost(Long postId, boolean featured);
     Page<PostDto> getPostsByCategory(Long categoryId, Pageable pageable);

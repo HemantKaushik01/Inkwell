@@ -1,226 +1,191 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Shield, Camera, Save, Key, AlertCircle, CheckCircle } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
+import { User, Mail, Shield, Camera, Save, Key, BookOpen, Heart, Eye } from 'lucide-react';
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('info');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [stats, setStats] = useState({ posts: 0, views: 0, likes: 0 });
 
-  // Profile Form State
   const [name, setName] = useState(user?.fullName || '');
   const [username, setUsername] = useState(user?.username || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
 
-  // Password Form State
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const clearMessage = () => setMessage({ type: '', text: '' });
+  useEffect(() => {
+    if (user && (user.role === 'AUTHOR' || user.role === 'ADMIN')) {
+      api.get(`/posts/author/${user.id}`).then(res => {
+        const posts = res.data || [];
+        setStats({
+          posts: posts.length,
+          views: posts.reduce((a, p) => a + (p.viewCount || 0), 0),
+          likes: posts.reduce((a, p) => a + (p.likeCount || 0), 0),
+        });
+      }).catch(() => {});
+    }
+  }, [user]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
-    clearMessage();
     try {
-      const res = await api.put('/users/profile', {
-        fullName: name,
-        username,
-        bio,
-        avatarUrl
-      });
+      const res = await api.put('/users/profile', { fullName: name, username, bio, avatarUrl });
       updateUser(res.data);
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Failed to update profile.';
-      setMessage({ type: 'error', text: errorMsg });
-    } finally {
-      setLoading(false);
-    }
+      toast.error(err.response?.data?.message || 'Failed to update profile.');
+    } finally { setLoading(false); }
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      return setMessage({ type: 'error', text: 'New passwords do not match.' });
-    }
+    if (newPassword !== confirmPassword) { toast.error('Passwords do not match.'); return; }
     setLoading(true);
-    clearMessage();
     try {
-      await api.put('/auth/password', {
-        oldPassword,
-        newPassword
-      });
-      setMessage({ type: 'success', text: 'Password changed successfully!' });
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      await api.put('/auth/password', { oldPassword, newPassword });
+      toast.success('Password changed successfully!');
+      setOldPassword(''); setNewPassword(''); setConfirmPassword('');
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to change password.' });
-    } finally {
-      setLoading(false);
-    }
+      toast.error(err.response?.data?.message || 'Failed to change password.');
+    } finally { setLoading(false); }
   };
+
+  const TABS = [
+    { id: 'info', label: 'Profile Info', icon: <User size={16} /> },
+    { id: 'security', label: 'Security', icon: <Shield size={16} /> },
+  ];
+
+  if (!user) return null;
+  const initials = (user.fullName || user.username || '?').slice(0, 2).toUpperCase();
 
   return (
     <div className="container section animate-fade-in">
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.5rem', marginBottom: '2rem' }}>My Profile</h1>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '3rem' }}>
+        {/* Profile Header Card */}
+        <div className="card" style={{ marginBottom: '2rem', padding: '2.5rem', display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '2rem', alignItems: 'center' }}>
+          {/* Avatar */}
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <div style={{ width: 96, height: 96, borderRadius: '50%', border: '3px solid var(--color-border)', overflow: 'hidden', background: 'var(--gradient-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '2rem' }}>
+              {avatarUrl || user.avatarUrl
+                ? <img src={avatarUrl || user.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : initials}
+            </div>
+            <label title="Change avatar URL" style={{ position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px solid var(--color-bg)' }}>
+              <Camera size={13} color="white" />
+            </label>
+          </div>
+          {/* Info */}
+          <div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.2rem' }}>{user.fullName || user.username}</h2>
+            <p style={{ color: 'var(--color-text-3)', fontSize: '0.88rem', marginBottom: '0.4rem' }}>@{user.username} · {user.email}</p>
+            <span className={`badge ${user.role === 'ADMIN' ? 'badge-danger' : user.role === 'AUTHOR' ? 'badge-primary' : 'badge-neutral'}`}>
+              {user.role}
+            </span>
+          </div>
+          {/* Stats */}
+          {(user.role === 'AUTHOR' || user.role === 'ADMIN') && (
+            <div style={{ display: 'flex', gap: '2rem', textAlign: 'center' }}>
+              {[
+                { label: 'Stories', value: stats.posts, icon: <BookOpen size={16} /> },
+                { label: 'Views', value: stats.views.toLocaleString(), icon: <Eye size={16} /> },
+                { label: 'Likes', value: stats.likes.toLocaleString(), icon: <Heart size={16} /> },
+              ].map(s => (
+                <div key={s.label}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.03em' }}>{s.value}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-3)', display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'center' }}>{s.icon} {s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '2rem' }}>
           {/* Sidebar Tabs */}
           <aside>
-            <div style={{ position: 'sticky', top: '100px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <button 
-                onClick={() => setActiveTab('info')}
-                className={`btn ${activeTab === 'info' ? 'btn-primary' : 'btn-outline'}`}
-                style={{ justifyContent: 'flex-start', padding: '0.8rem 1.5rem', borderRadius: 'var(--radius-md)' }}
-              >
-                <User size={18} style={{ marginRight: '0.8rem' }} /> Profile Info
-              </button>
-              <button 
-                onClick={() => setActiveTab('security')}
-                className={`btn ${activeTab === 'security' ? 'btn-primary' : 'btn-outline'}`}
-                style={{ justifyContent: 'flex-start', padding: '0.8rem 1.5rem', borderRadius: 'var(--radius-md)' }}
-              >
-                <Shield size={18} style={{ marginRight: '0.8rem' }} /> Account Security
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', position: 'sticky', top: 80 }}>
+              {TABS.map(tab => (
+                <button key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`admin-nav-item${activeTab === tab.id ? ' active' : ''}`}
+                >
+                  {tab.icon} {tab.label}
+                </button>
+              ))}
             </div>
           </aside>
 
-          {/* Main Content Area */}
-          <div className="card" style={{ padding: '3rem' }}>
-            {message.text && (
-              <div style={{ 
-                padding: '1rem', 
-                borderRadius: 'var(--radius-md)', 
-                marginBottom: '2rem', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.8rem',
-                backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2',
-                color: message.type === 'success' ? '#166534' : '#991b1b',
-                border: `1px solid ${message.type === 'success' ? '#bcf0da' : '#f87171'}`
-              }}>
-                {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                {message.text}
-              </div>
-            )}
-
+          {/* Content */}
+          <div className="card" style={{ padding: '2.5rem' }}>
             {activeTab === 'info' ? (
               <form onSubmit={handleUpdateProfile}>
-                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                  <div style={{ position: 'relative', display: 'inline-block' }}>
-                    <img 
-                      src={avatarUrl || `https://ui-avatars.com/api/?name=${user?.fullName}&background=random`} 
-                      alt="Avatar" 
-                      style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: 'var(--shadow-lg)' }} 
-                    />
-                    <div style={{ position: 'absolute', bottom: '5px', right: '5px', backgroundColor: 'var(--color-primary)', color: 'white', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}>
-                      <Camera size={16} />
-                    </div>
+                <h3 style={{ marginBottom: '1.75rem', fontWeight: 800 }}>Profile Information</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Full Name</label>
+                    <input type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} required />
                   </div>
-                  <p style={{ marginTop: '1rem', fontSize: '1.2rem', fontWeight: 600 }}>{user?.fullName}</p>
-                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{user?.email}</p>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Username</label>
+                    <input type="text" className="form-input" value={username} onChange={e => setUsername(e.target.value)} required />
+                  </div>
                 </div>
-
+                <div className="form-group mt-4">
+                  <label className="form-label"><Camera size={14} /> Avatar URL</label>
+                  <input type="text" className="form-input" placeholder="https://example.com/avatar.jpg"
+                    value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} />
+                  {avatarUrl && (
+                    <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <img src={avatarUrl} alt="Preview" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-border)' }} onError={e => e.target.style.display = 'none'} />
+                      <span className="text-sm text-muted">Avatar preview</span>
+                    </div>
+                  )}
+                </div>
                 <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)} 
-                    required 
-                  />
+                  <label className="form-label">Bio</label>
+                  <textarea className="form-input" rows={4} value={bio} onChange={e => setBio(e.target.value)}
+                    placeholder="Tell the world your story…" style={{ resize: 'none' }} />
+                  <div className="form-hint">{bio.length}/200 characters</div>
                 </div>
-
-                <div className="form-group">
-                  <label className="form-label">Username</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={username} 
-                    onChange={(e) => setUsername(e.target.value)} 
-                    required 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Avatar URL</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    placeholder="https://example.com/avatar.jpg"
-                    value={avatarUrl} 
-                    onChange={(e) => setAvatarUrl(e.target.value)} 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Bio (Tell the world your story)</label>
-                  <textarea 
-                    className="form-input" 
-                    rows="4" 
-                    value={bio} 
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Writers, dreamers, and early adopters..."
-                    style={{ resize: 'none' }}
-                  ></textarea>
-                </div>
-
-                <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', marginTop: '1rem' }}>
-                  <Save size={18} style={{ marginRight: '0.8rem' }} /> {loading ? 'Saving...' : 'Update Profile'}
+                <button type="submit" className="btn btn-primary btn-pill" disabled={loading} style={{ marginTop: '0.5rem' }}>
+                  <Save size={16} /> {loading ? 'Saving…' : 'Save Changes'}
                 </button>
               </form>
             ) : (
               <form onSubmit={handleChangePassword}>
-                <div style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Change Password</h3>
-                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                    Ensure your account is using a long, random password to stay secure.
-                  </p>
-                </div>
-
+                <h3 style={{ marginBottom: '0.5rem', fontWeight: 800 }}>Change Password</h3>
+                <p style={{ color: 'var(--color-text-3)', fontSize: '0.88rem', marginBottom: '2rem' }}>
+                  Choose a strong, unique password to keep your account secure.
+                </p>
                 <div className="form-group">
-                  <label className="form-label">Current Password</label>
-                  <input 
-                    type="password" 
-                    className="form-input" 
-                    value={oldPassword} 
-                    onChange={(e) => setOldPassword(e.target.value)} 
-                    required 
-                  />
+                  <label className="form-label"><Key size={14} /> Current Password</label>
+                  <input type="password" className="form-input" value={oldPassword}
+                    onChange={e => setOldPassword(e.target.value)} required autoComplete="current-password" />
                 </div>
-
-                <div className="form-group" style={{ marginTop: '2rem' }}>
+                <div className="divider" style={{ margin: '1.5rem 0' }} />
+                <div className="form-group">
                   <label className="form-label">New Password</label>
-                  <input 
-                    type="password" 
-                    className="form-input" 
-                    value={newPassword} 
-                    onChange={(e) => setNewPassword(e.target.value)} 
-                    required 
-                  />
+                  <input type="password" className="form-input" value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)} required autoComplete="new-password" placeholder="Min. 8 characters" />
                 </div>
-
                 <div className="form-group">
                   <label className="form-label">Confirm New Password</label>
-                  <input 
-                    type="password" 
-                    className="form-input" 
-                    value={confirmPassword} 
-                    onChange={(e) => setConfirmPassword(e.target.value)} 
-                    required 
-                  />
+                  <input type="password" className="form-input" value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)} required autoComplete="new-password" />
+                  {confirmPassword && newPassword !== confirmPassword && (
+                    <div className="form-error">Passwords do not match</div>
+                  )}
                 </div>
-
-                <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', marginTop: '2rem' }}>
-                  <Key size={18} style={{ marginRight: '0.8rem' }} /> {loading ? 'Updating Password...' : 'Change Password'}
+                <button type="submit" className="btn btn-primary btn-pill" disabled={loading || (confirmPassword && newPassword !== confirmPassword)}>
+                  <Shield size={16} /> {loading ? 'Updating…' : 'Change Password'}
                 </button>
               </form>
             )}

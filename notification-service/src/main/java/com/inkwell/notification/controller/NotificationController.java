@@ -34,7 +34,11 @@ public class NotificationController {
     }
 
     @GetMapping("/api/notifications/unread-count")
-    public ResponseEntity<Map<String, Long>> getUnreadCount(@RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<Map<String, Long>> getUnreadCount(
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.ok(Map.of("count", 0L));
+        }
         return ResponseEntity.ok(Map.of("count", notificationService.getUnreadCount(userId)));
     }
 

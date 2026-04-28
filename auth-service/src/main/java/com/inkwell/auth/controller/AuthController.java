@@ -132,6 +132,20 @@ public class AuthController {
 
     @GetMapping("/api/admin/users")
     public ResponseEntity<List<UserDto>> getAllUsers() {
-        return ResponseEntity.ok(authService.getAllAuthors());
+        return ResponseEntity.ok(authService.getAllUsers());
+    }
+
+    @PutMapping("/api/admin/users/{id}/role")
+    public ResponseEntity<Map<String,String>> changeUserRole(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        authService.changeUserRole(id, body.get("role"));
+        return ResponseEntity.ok(Map.of("message", "User role updated successfully"));
+    }
+
+    @DeleteMapping("/api/admin/users/{id}")
+    public ResponseEntity<Map<String,String>> deleteUser(@PathVariable Long id) {
+        authService.deleteUser(id);
+        return ResponseEntity.ok(Map.of("message", "User completely deleted"));
     }
 }

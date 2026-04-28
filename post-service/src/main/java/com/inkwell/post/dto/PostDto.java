@@ -24,6 +24,7 @@ public class PostDto {
     private Long viewCount;
     private Long likeCount;
     private boolean featured;
+    private boolean likedByCurrentUser;
     private Set<String> tags;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

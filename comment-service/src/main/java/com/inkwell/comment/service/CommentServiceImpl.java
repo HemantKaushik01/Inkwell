@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
+    private final com.inkwell.comment.repository.CommentConfigRepository commentConfigRepository;
     private final PostServiceClient postServiceClient;
     private final NotificationServiceClient notificationServiceClient;
 
@@ -38,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
                 .userId(userId)
                 .userName(userName)
                 .content(request.getContent())
-                .status(Comment.CommentStatus.PENDING) // Default to PENDING for moderation
+                .status(isModerationRequired() ? Comment.CommentStatus.PENDING : Comment.CommentStatus.APPROVED)
                 .build();
         
         Comment saved = commentRepository.save(comment);
@@ -46,7 +47,8 @@ public class CommentServiceImpl implements CommentService {
         // Notify post author
         Long authorId = ((Number) post.get("authorId")).longValue();
         if (!authorId.equals(userId)) {
-            notifyUser(authorId, "NEW_COMMENT", userName + " commented on your post", postId);
+            String postSlug = (String) post.get("slug");
+            notifyUser(authorId, "NEW_COMMENT", "New Comment", userName + " commented on your post", saved.getId(), postSlug, "COMMENT");
         }
 
         return CommentDto.fromEntity(saved);
@@ -67,14 +69,16 @@ public class CommentServiceImpl implements CommentService {
                 .userName(userName)
                 .content(request.getContent())
                 .parentCommentId(commentId)
-                .status(Comment.CommentStatus.PENDING)
+                .status(isModerationRequired() ? Comment.CommentStatus.PENDING : Comment.CommentStatus.APPROVED)
                 .build();
 
         Comment saved = commentRepository.save(reply);
 
         // Notify parent comment author
         if (!parent.getUserId().equals(userId)) {
-            notifyUser(parent.getUserId(), "NEW_REPLY", userName + " replied to your comment", parent.getPostId());
+            java.util.Map<String, Object> post = postServiceClient.getPostById(parent.getPostId());
+            String postSlug = post != null ? (String) post.get("slug") : null;
+            notifyUser(parent.getUserId(), "NEW_REPLY", "New Reply", userName + " replied to your comment", saved.getId(), postSlug, "COMMENT");
         }
 
         return CommentDto.fromEntity(saved);
@@ -136,6 +140,15 @@ public class CommentServiceImpl implements CommentService {
         
         comment.setStatus(Comment.CommentStatus.DELETED);
         commentRepository.save(comment);
+        
+        // Soft delete all child replies if it is a parent
+        if (comment.getParentCommentId() == null) {
+            java.util.List<Comment> children = commentRepository.findByParentCommentId(commentId);
+            if (children != null && !children.isEmpty()) {
+                children.forEach(child -> child.setStatus(Comment.CommentStatus.DELETED));
+                commentRepository.saveAll(children);
+            }
+        }
     }
 
     @Override
@@ -156,18 +169,16 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto likeComment(Long id) {
-        Comment comment = commentRepository.findById(id).orElseThrow();
-        comment.setLikesCount(comment.getLikesCount() + 1);
-        return CommentDto.fromEntity(commentRepository.save(comment));
+        if (!commentRepository.existsById(id)) throw new RuntimeException("Comment not found: " + id);
+        commentRepository.incrementLikes(id);
+        return CommentDto.fromEntity(commentRepository.findById(id).orElseThrow());
     }
 
     @Override
     public CommentDto unlikeComment(Long id) {
-        Comment comment = commentRepository.findById(id).orElseThrow();
-        if (comment.getLikesCount() > 0) {
-            comment.setLikesCount(comment.getLikesCount() - 1);
-        }
-        return CommentDto.fromEntity(commentRepository.save(comment));
+        if (!commentRepository.existsById(id)) throw new RuntimeException("Comment not found: " + id);
+        commentRepository.decrementLikes(id);
+        return CommentDto.fromEntity(commentRepository.findById(id).orElseThrow());
     }
 
     @Override
@@ -185,14 +196,36 @@ public class CommentServiceImpl implements CommentService {
         return CommentDto.fromEntity(commentRepository.save(comment));
     }
 
-    private void notifyUser(Long userId, String type, String message, Long referenceId) {
+    @Override
+    public void setModerationRequired(boolean required, String userRole) {
+        if (!"ADMIN".equals(userRole)) {
+            throw new RuntimeException("Access denied");
+        }
+        com.inkwell.comment.entity.CommentConfig config = commentConfigRepository.findById(1L)
+                .orElse(com.inkwell.comment.entity.CommentConfig.builder().id(1L).moderationRequired(false).build());
+        config.setModerationRequired(required);
+        commentConfigRepository.save(config);
+    }
+
+    @Override
+    public boolean isModerationRequired() {
+        return commentConfigRepository.findById(1L)
+                .map(com.inkwell.comment.entity.CommentConfig::isModerationRequired)
+                .orElse(false);
+    }
+
+    private void notifyUser(Long userId, String type, String title, String message, Long relatedId, String relatedSlug, String relatedType) {
         try {
-            Map<String, Object> payload = Map.of(
-                    "userId", userId,
-                    "type", type,
-                    "message", message,
-                    "referenceId", referenceId
-            );
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+            payload.put("recipientId", userId);
+            payload.put("type", type);
+            payload.put("title", title);
+            payload.put("message", message);
+            payload.put("relatedId", relatedId);
+            payload.put("relatedSlug", relatedSlug);
+            payload.put("relatedType", relatedType);
+            payload.put("sendEmail", true);
+            
             notificationServiceClient.sendNotification(payload);
         } catch (Exception e) {
             log.warn("Failed to send notification: {}", e.getMessage());
