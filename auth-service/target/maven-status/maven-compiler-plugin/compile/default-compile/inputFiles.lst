@@ -1,0 +1,17 @@
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\AuthServiceApplication.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\ChangePasswordRequest.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\UpdateProfileRequest.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\UserDto.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\service\AuthServiceImpl.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\exception\GlobalExceptionHandler.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\LoginRequest.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\OAuthLoginRequest.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\security\GatewayHeaderFilter.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\AuthResponse.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\RegisterRequest.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\security\SecurityConfig.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\repository\UserRepository.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\controller\AuthController.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\entity\User.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\security\JwtTokenProvider.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\service\AuthService.java
