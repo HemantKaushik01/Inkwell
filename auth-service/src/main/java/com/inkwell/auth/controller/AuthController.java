@@ -85,6 +85,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.getAllAuthors());
     }
 
+    @PostMapping("/api/users/find-by-emails")
+    public ResponseEntity<List<UserDto>> findByEmails(@RequestBody List<String> emails) {
+        return ResponseEntity.ok(authService.findByEmails(emails));
+    }
+
     // Follow system
     @PostMapping("/api/users/{id}/follow")
     public ResponseEntity<Map<String,String>> follow(

@@ -71,6 +71,63 @@ spring:
           filters:
             - JwtAuthFilter
 
+        # Swagger UI pass-through routes (no JWT filter)
+        - id: auth-service-swagger
+          uri: lb://auth-service
+          predicates:
+            - Path=/docs/auth-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/auth-service/(?<segment>.*), /${segment}
+
+        - id: post-service-swagger
+          uri: lb://post-service
+          predicates:
+            - Path=/docs/post-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/post-service/(?<segment>.*), /${segment}
+
+        - id: comment-service-swagger
+          uri: lb://comment-service
+          predicates:
+            - Path=/docs/comment-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/comment-service/(?<segment>.*), /${segment}
+
+        - id: category-tag-service-swagger
+          uri: lb://category-tag-service
+          predicates:
+            - Path=/docs/category-tag-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/category-tag-service/(?<segment>.*), /${segment}
+
+        - id: media-service-swagger
+          uri: lb://media-service
+          predicates:
+            - Path=/docs/media-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/media-service/(?<segment>.*), /${segment}
+
+        - id: newsletter-service-swagger
+          uri: lb://newsletter-service
+          predicates:
+            - Path=/docs/newsletter-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/newsletter-service/(?<segment>.*), /${segment}
+
+        - id: notification-service-swagger
+          uri: lb://notification-service
+          predicates:
+            - Path=/docs/notification-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/notification-service/(?<segment>.*), /${segment}
+
+        - id: analytics-service-swagger
+          uri: lb://analytics-service
+          predicates:
+            - Path=/docs/analytics-service/v3/api-docs
+          filters:
+            - RewritePath=/docs/analytics-service/(?<segment>.*), /${segment}
+
 eureka:
   client:
     service-url:

@@ -26,3 +26,14 @@ jwt:
   secret: inkwell-super-secret-jwt-key-must-be-256-bits-long-here
   access-token-expiry: 3600000     # 60 minutes
   refresh-token-expiry: 604800000  # 7 days
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+google:
+  client-id: 622463594939-750rrmeh25q2apo9knkeq42qhrf5c8u9.apps.googleusercontent.com
+

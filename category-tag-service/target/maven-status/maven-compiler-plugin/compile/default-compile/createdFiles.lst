@@ -1,6 +1,7 @@
 com\inkwell\categorytag\repository\CategoryRepository.class
 com\inkwell\categorytag\controller\CategoryController.class
 com\inkwell\categorytag\controller\TagController.class
+com\inkwell\categorytag\config\SwaggerConfig.class
 com\inkwell\categorytag\entity\Category.class
 com\inkwell\categorytag\security\SecurityConfig.class
 com\inkwell\categorytag\entity\PostTag.class

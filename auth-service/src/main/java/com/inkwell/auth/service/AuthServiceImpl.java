@@ -1,8 +1,10 @@
 package com.inkwell.auth.service;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.inkwell.auth.dto.*;
 import com.inkwell.auth.entity.User;
 import com.inkwell.auth.repository.UserRepository;
+import com.inkwell.auth.security.GoogleTokenVerifier;
 import com.inkwell.auth.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +22,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final GoogleTokenVerifier googleTokenVerifier;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -190,25 +193,34 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse handleOAuthLogin(OAuthLoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        // 1. Verify the Google ID Token with Google's servers
+        GoogleIdToken.Payload payload = googleTokenVerifier.verify(request.getIdToken());
+
+        // 2. Extract user info from the verified payload (safe — comes from Google)
+        String email    = payload.getEmail();
+        String fullName = (String) payload.get("name");
+        String avatar   = (String) payload.get("picture");
+
+        // 3. Find or create the user in our DB
+        User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
-            String username = request.getEmail().split("@")[0] + "_" + System.currentTimeMillis();
+            String username = email.split("@")[0] + "_" + System.currentTimeMillis();
             user = User.builder()
-                    .email(request.getEmail())
+                    .email(email)
                     .username(username)
-                    .fullName(request.getFullName())
-                    .password(passwordEncoder.encode("OAUTH_" + System.currentTimeMillis()))
+                    .fullName(fullName != null ? fullName : email.split("@")[0])
+                    .password(passwordEncoder.encode("GOOGLE_OAUTH_" + System.currentTimeMillis()))
                     .role(User.Role.READER)
-                    .provider(User.Provider.valueOf(request.getProvider().toUpperCase()))
-                    .avatarUrl(request.getAvatarUrl())
+                    .provider(User.Provider.GOOGLE)
+                    .avatarUrl(avatar)
                     .isActive(true)
                     .build();
             user = userRepository.save(user);
         } else {
             if (!user.isActive()) throw new RuntimeException("Account suspended");
-            // Update if provider differs or avatar changed
-            if (request.getAvatarUrl() != null && user.getAvatarUrl() == null) {
-                user.setAvatarUrl(request.getAvatarUrl());
+            // Update avatar from Google if we don't have one yet
+            if (avatar != null && user.getAvatarUrl() == null) {
+                user.setAvatarUrl(avatar);
                 user = userRepository.save(user);
             }
         }
@@ -220,6 +232,14 @@ public class AuthServiceImpl implements AuthService {
     public UserDto getUserByEmail(String email) {
         return UserDto.fromEntity(userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("User not found")));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> findByEmails(List<String> emails) {
+        return userRepository.findByEmailIn(emails).stream()
+                .map(UserDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

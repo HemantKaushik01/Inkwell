@@ -1,6 +1,8 @@
 E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\AuthServiceApplication.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\config\SwaggerConfig.java
 E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\ChangePasswordRequest.java
 E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\UpdateProfileRequest.java
+E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\security\GoogleTokenVerifier.java
 E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\dto\UserDto.java
 E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\service\AuthServiceImpl.java
 E:\IncrediblesThoughts\auth-service\src\main\java\com\inkwell\auth\exception\GlobalExceptionHandler.java

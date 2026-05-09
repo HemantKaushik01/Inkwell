@@ -4,6 +4,7 @@ E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\reposit
 E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\security\SecurityConfig.java
 E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\CommentServiceApplication.java
 E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\client\PostServiceClient.java
+E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\config\SwaggerConfig.java
 E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\entity\Comment.java
 E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\dto\AddCommentRequest.java
 E:\IncrediblesThoughts\comment-service\src\main\java\com\inkwell\comment\dto\CommentDto.java

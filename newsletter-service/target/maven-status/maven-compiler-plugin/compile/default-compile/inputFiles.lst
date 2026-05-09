@@ -1,5 +1,10 @@
+E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\config\SwaggerConfig.java
 E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\service\NewsletterService.java
+E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\client\NotificationServiceClient.java
+E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\client\AuthServiceClient.java
 E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\NewsletterServiceApplication.java
+E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\repository\CampaignRepository.java
+E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\entity\Campaign.java
 E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\controller\NewsletterController.java
 E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\repository\SubscriberRepository.java
 E:\IncrediblesThoughts\newsletter-service\src\main\java\com\inkwell\newsletter\entity\Subscriber.java

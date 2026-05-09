@@ -1,6 +1,7 @@
 com\inkwell\media\service\MediaService.class
 com\inkwell\media\controller\MediaController.class
 com\inkwell\media\entity\Media.class
+com\inkwell\media\config\SwaggerConfig.class
 com\inkwell\media\entity\Media$MediaBuilder.class
 com\inkwell\media\MediaServiceApplication.class
 com\inkwell\media\security\SecurityConfig.class

@@ -31,6 +31,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                // Swagger UI
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 // Public read-only user profile data
                 .requestMatchers(HttpMethod.GET, "/api/users/authors").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/{id}").permitAll()

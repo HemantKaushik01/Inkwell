@@ -26,10 +26,21 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
             "/api/auth/register",
             "/api/auth/login",
             "/api/auth/refresh",
+            "/api/auth/logout",
+            "/api/auth/oauth",       // Google / social OAuth — no JWT needed yet
             "/api/newsletter/subscribe",
             "/api/newsletter/confirm",
             "/api/media/view",
             "/api/media/download"
+    );
+
+    private static final List<String> PUBLIC_GET_PREFIXES = List.of(
+            "/api/posts",
+            "/api/categories",
+            "/api/tags",
+            "/api/users/authors",
+            "/api/comments",
+            "/api/analytics"
     );
 
     // These endpoints accept requests without auth (no X-User-Id required downstream)

@@ -4,6 +4,7 @@ com\inkwell\post\controller\PostController.class
 com\inkwell\post\entity\Post$PostStatus.class
 com\inkwell\post\entity\PostLike$PostLikeBuilder.class
 com\inkwell\post\dto\PostDto$PostDtoBuilder.class
+com\inkwell\post\config\SwaggerConfig.class
 com\inkwell\post\PostServiceApplication.class
 com\inkwell\post\client\NotificationServiceClient.class
 com\inkwell\post\repository\PostRepository.class

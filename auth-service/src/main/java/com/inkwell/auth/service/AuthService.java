@@ -27,6 +27,7 @@ public interface AuthService {
     void deactivateAccount(Long userId);
     AuthResponse handleOAuthLogin(OAuthLoginRequest request);
     UserDto getUserByEmail(String email);
+    List<UserDto> findByEmails(List<String> emails);
 
     // Admin ops
     List<UserDto> getAllUsers();

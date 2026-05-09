@@ -6,13 +6,5 @@ import lombok.Data;
 @Data
 public class OAuthLoginRequest {
     @NotBlank
-    private String email;
-    
-    @NotBlank
-    private String fullName;
-    
-    @NotBlank
-    private String provider; // GOOGLE or GITHUB
-    
-    private String avatarUrl;
+    private String idToken; // Google ID Token sent by the frontend after popup
 }

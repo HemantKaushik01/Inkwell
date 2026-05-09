@@ -1,0 +1,3 @@
+com\inkwell\auth\controller\AuthControllerTest.class
+com\inkwell\auth\security\JwtTokenProviderTest.class
+com\inkwell\auth\service\AuthServiceImplTest.class

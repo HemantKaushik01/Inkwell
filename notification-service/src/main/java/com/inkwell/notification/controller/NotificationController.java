@@ -91,4 +91,19 @@ public class NotificationController {
         notificationService.processNotification(payload);
         return ResponseEntity.ok().build();
     }
+
+    // Internal endpoint for other services to trigger bulk notifications
+    @PostMapping("/api/notifications/internal/bulk")
+    public ResponseEntity<Void> sendBulkInternal(@RequestBody Map<String, Object> body) {
+        List<Long> recipientIds = (List<Long>) body.get("userIds");
+        String type = (String) body.get("type");
+        String title = (String) body.get("title");
+        String message = (String) body.get("message");
+        Long relatedId = body.get("referenceId") != null ? ((Number) body.get("referenceId")).longValue() : null;
+        String relatedSlug = (String) body.get("relatedSlug");
+        String relatedType = (String) body.get("relatedType");
+        
+        notificationService.sendBulk(recipientIds, type, title, message, relatedId, relatedSlug, relatedType);
+        return ResponseEntity.ok().build();
+    }
 }

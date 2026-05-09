@@ -1,6 +1,7 @@
 E:\IncrediblesThoughts\media-service\src\main\java\com\inkwell\media\service\MediaServiceImpl.java
 E:\IncrediblesThoughts\media-service\src\main\java\com\inkwell\media\service\MediaService.java
 E:\IncrediblesThoughts\media-service\src\main\java\com\inkwell\media\entity\Media.java
+E:\IncrediblesThoughts\media-service\src\main\java\com\inkwell\media\config\SwaggerConfig.java
 E:\IncrediblesThoughts\media-service\src\main\java\com\inkwell\media\repository\MediaRepository.java
 E:\IncrediblesThoughts\media-service\src\main\java\com\inkwell\media\security\SecurityConfig.java
 E:\IncrediblesThoughts\media-service\src\main\java\com\inkwell\media\controller\MediaController.java

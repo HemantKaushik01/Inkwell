@@ -1,3 +1,4 @@
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\client\NewsletterServiceClient.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\service\PostServiceImpl.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\repository\PostLikeRepository.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\dto\CreatePostRequest.java
@@ -8,6 +9,7 @@ E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\entity\Post.j
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\security\SecurityConfig.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\client\AuthServiceClient.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\PostServiceApplication.java
+E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\config\SwaggerConfig.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\controller\PostController.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\entity\PostLike.java
 E:\IncrediblesThoughts\post-service\src\main\java\com\inkwell\post\service\PostService.java

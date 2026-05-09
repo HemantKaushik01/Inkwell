@@ -32,6 +32,7 @@ public class PostServiceImpl implements PostService {
     private final PostLikeRepository postLikeRepository;
     private final AuthServiceClient authServiceClient;
     private final NotificationServiceClient notificationServiceClient;
+    private final com.inkwell.post.client.NewsletterServiceClient newsletterServiceClient;
 
     @Override
     public PostDto createPost(Long authorId, String authorName, CreatePostRequest request) {
@@ -181,6 +182,24 @@ public class PostServiceImpl implements PostService {
             PostLike like = PostLike.builder().postId(postId).userId(userId).build();
             postLikeRepository.save(like);
             post.setLikeCount(post.getLikeCount() + 1);
+            
+            // Send Notification to author
+            if (!post.getAuthorId().equals(userId)) {
+                try {
+                    Map<String, Object> payload = new java.util.HashMap<>();
+                    payload.put("recipientId", post.getAuthorId());
+                    payload.put("actorId", userId);
+                    payload.put("type", "NEW_LIKE");
+                    payload.put("title", "New Like");
+                    payload.put("message", "Someone liked your post: " + post.getTitle());
+                    payload.put("relatedId", post.getId());
+                    payload.put("relatedSlug", post.getSlug());
+                    payload.put("relatedType", "POST");
+                    notificationServiceClient.sendNotification(payload);
+                } catch (Exception e) {
+                    log.warn("Failed to send like notification: {}", e.getMessage());
+                }
+            }
         }
         Post saved = postRepository.save(post);
         PostDto dto = PostDto.fromEntity(saved);
@@ -253,6 +272,18 @@ public class PostServiceImpl implements PostService {
             }
         } catch (Exception e) {
             log.warn("Failed to send notifications: {}", e.getMessage());
+        }
+        
+        try {
+            Map<String, Object> newsletterPayload = Map.of(
+                    "authorName", authorName,
+                    "postTitle", post.getTitle(),
+                    "postId", post.getId(),
+                    "postSlug", post.getSlug()
+            );
+            newsletterServiceClient.dispatchNewPost(newsletterPayload);
+        } catch (Exception e) {
+            log.warn("Failed to notify newsletter service: {}", e.getMessage());
         }
     }
 

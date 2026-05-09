@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { PenSquare, LogOut, Bell, Menu, X, LayoutDashboard, BookOpen, Users } from 'lucide-react';
+import { PenSquare, LogOut, Bell, Menu, X, LayoutDashboard, BookOpen, Users, Mail } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import ThemeToggle from './ThemeToggle';
@@ -64,6 +64,10 @@ export default function Navbar() {
     <>
       <Link to="/" className={`nav-item ${mobile ? 'w-full' : ''}`} style={mobile ? { padding: '0.875rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem' } : {}}>
         <BookOpen size={16} /> Home
+      </Link>
+      
+      <Link to="/newsletters" className={`nav-item ${mobile ? 'w-full' : ''}`} style={mobile ? { padding: '0.875rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem' } : {}}>
+        <Mail size={16} /> Newsletters
       </Link>
 
       <button onClick={handleWriteClick} className={`nav-item ${mobile ? 'w-full' : ''}`} style={mobile ? { padding: '0.875rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem', width: '100%', textAlign: 'left', justifyContent: 'flex-start' } : {}}>
@@ -140,7 +144,6 @@ export default function Navbar() {
           {/* Desktop links */}
           <div className="nav-links" style={{ gap: '0.2rem' }}>
             <NavLinks />
-            <ThemeToggle />
           </div>
 
           {/* Mobile right side */}

@@ -1,5 +1,6 @@
 com\inkwell\analytics\client\PostServiceClient.class
 com\inkwell\analytics\AnalyticsServiceApplication.class
+com\inkwell\analytics\config\SwaggerConfig.class
 com\inkwell\analytics\service\AnalyticsService.class
 com\inkwell\analytics\controller\AnalyticsController.class
 com\inkwell\analytics\security\SecurityConfig.class

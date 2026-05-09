@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Eye, EyeOff, Mail, Lock, User, Feather, ArrowRight } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
   const [searchParams] = useSearchParams();
@@ -17,9 +18,24 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, register } = useAuth();
+  const { login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    setLoading(true);
+    try {
+      await googleLogin(credentialResponse.credential);
+      toast.success('Welcome to InkWell!', 'Signed in with Google');
+      navigate('/');
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Google sign-in failed. Please try again.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setError('');
@@ -187,6 +203,26 @@ export default function Login() {
                 <>{isLoginMode ? 'Sign In' : 'Create Account'} <ArrowRight size={16} /></>
               )}
             </button>
+
+            {/* ——— OR divider ——— */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '0.25rem 0' }}>
+              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--color-border)' }} />
+              <span style={{ color: 'var(--color-text-3)', fontSize: '0.8rem', fontWeight: 500 }}>or continue with</span>
+              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--color-border)' }} />
+            </div>
+
+            {/* ——— Google Sign-In Button ——— */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google sign-in was cancelled or failed.')}
+                width="380"
+                theme="outline"
+                shape="pill"
+                text={isLoginMode ? 'signin_with' : 'signup_with'}
+                logo_alignment="center"
+              />
+            </div>
           </form>
         </div>
       </div>

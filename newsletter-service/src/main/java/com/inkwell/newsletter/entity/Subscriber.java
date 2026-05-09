@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "subscribers")
@@ -21,9 +23,20 @@ public class Subscriber {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "is_confirmed")
+    public enum SubscriberStatus {
+        PENDING, ACTIVE
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     @Builder.Default
-    private boolean confirmed = false;
+    private SubscriberStatus status = SubscriberStatus.PENDING;
+
+    @ElementCollection
+    @CollectionTable(name = "subscriber_tags", joinColumns = @JoinColumn(name = "subscriber_id"))
+    @Column(name = "tag")
+    @Builder.Default
+    private Set<String> tags = new HashSet<>();
 
     private String token;
 

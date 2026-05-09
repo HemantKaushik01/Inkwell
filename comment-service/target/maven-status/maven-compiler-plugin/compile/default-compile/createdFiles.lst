@@ -1,5 +1,6 @@
 com\inkwell\comment\entity\Comment$CommentStatus.class
 com\inkwell\comment\service\CommentService.class
+com\inkwell\comment\config\SwaggerConfig.class
 com\inkwell\comment\client\PostServiceClient.class
 com\inkwell\comment\dto\CommentDto.class
 com\inkwell\comment\client\NotificationServiceClient.class
