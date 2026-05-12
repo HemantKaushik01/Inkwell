@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api';
 import { useToast } from '../context/ToastContext';
-import { LayoutDashboard, Image, Mail, Settings, FileText, Users, Eye, Heart, Trash2, Copy, Check, ToggleLeft, ToggleRight, Send } from 'lucide-react';
+import { LayoutDashboard, Image, Mail, Settings, FileText, Users, Eye, Heart, Trash2, Copy, Check, ToggleLeft, ToggleRight, Send, Wrench, RefreshCw } from 'lucide-react';
 
 const NAV_TABS = [
   { id: 'analytics', label: 'Overview',  icon: <LayoutDashboard size={16} /> },
@@ -15,6 +15,7 @@ const NAV_TABS = [
 export default function AdminPanel() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState('analytics');
   const [stats, setStats] = useState(null);
@@ -23,18 +24,33 @@ export default function AdminPanel() {
   const [moderationRequired, setModerationRequired] = useState(false);
   const [newsletterSubject, setNewsletterSubject] = useState('');
   const [newsletterContent, setNewsletterContent] = useState('');
+  const [campaigns, setCampaigns] = useState([]);
+  const [editingCampaignId, setEditingCampaignId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [backfilling, setBackfilling] = useState(false);
 
   useEffect(() => {
     if (!user || user.role !== 'ADMIN') { navigate('/'); return; }
+    // Handle navigation state from Newsletters page (edit shortcut)
+    if (location.state?.tab === 'newsletter' && location.state?.campaign) {
+      const c = location.state.campaign;
+      setActiveTab('newsletter');
+      setNewsletterSubject(c.subject);
+      setNewsletterContent(c.content);
+      setEditingCampaignId(c.id);
+      // Clear the state so a refresh doesn't re-trigger
+      window.history.replaceState({}, '');
+    }
     (async () => {
       try {
-        const [statsRes, mediaRes] = await Promise.all([
+        const [statsRes, mediaRes, campaignsRes] = await Promise.all([
           api.get('/analytics/dashboard'),
           api.get('/media'),
+          api.get('/newsletter/campaigns').catch(() => ({ data: [] }))
         ]);
         setStats(statsRes.data);
         setMedia(mediaRes.data || []);
+        setCampaigns((campaignsRes.data || []).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)));
         try {
           const modRes = await api.get('/admin/comments/moderation');
           setModerationRequired(modRes.data.moderationRequired);
@@ -73,10 +89,49 @@ export default function AdminPanel() {
   const sendNewsletter = async () => {
     if (!newsletterSubject || !newsletterContent) { toast.warning('Please fill in subject and content.'); return; }
     try {
-      await api.post('/admin/newsletter/broadcast', { subject: newsletterSubject, content: newsletterContent });
-      toast.success('Newsletter dispatched to all subscribers!', 'Broadcast sent');
-      setNewsletterSubject(''); setNewsletterContent('');
-    } catch { toast.error('Failed to send newsletter.'); }
+      if (editingCampaignId) {
+        await api.put(`/admin/newsletter/campaigns/${editingCampaignId}`, { subject: newsletterSubject, content: newsletterContent });
+        toast.success('Newsletter updated successfully.');
+        setCampaigns(c => c.map(x => x.id === editingCampaignId ? { ...x, subject: newsletterSubject, content: newsletterContent } : x));
+      } else {
+        await api.post('/admin/newsletter/broadcast', { subject: newsletterSubject, content: newsletterContent });
+        toast.success('Newsletter dispatched to all subscribers!', 'Broadcast sent');
+        // Refresh campaigns
+        const res = await api.get('/newsletter/campaigns').catch(() => ({ data: [] }));
+        setCampaigns((res.data || []).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      }
+      setNewsletterSubject(''); setNewsletterContent(''); setEditingCampaignId(null);
+    } catch { toast.error(editingCampaignId ? 'Failed to update newsletter.' : 'Failed to send newsletter.'); }
+  };
+
+  const handleEditCampaign = (c) => {
+    setNewsletterSubject(c.subject);
+    setNewsletterContent(c.content);
+    setEditingCampaignId(c.id);
+    document.querySelector('.admin-layout main').scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteCampaign = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this newsletter?')) return;
+    try {
+      await api.delete(`/admin/newsletter/campaigns/${id}`);
+      setCampaigns(c => c.filter(x => x.id !== id));
+      toast.success('Newsletter deleted.');
+      if (editingCampaignId === id) {
+        setEditingCampaignId(null);
+        setNewsletterSubject('');
+        setNewsletterContent('');
+      }
+    } catch { toast.error('Failed to delete newsletter.'); }
+  };
+
+  const handleBackfillAuthors = async () => {
+    setBackfilling(true);
+    try {
+      const res = await api.post('/admin/posts/backfill-authors');
+      toast.success(`Fixed author names on ${res.data.postsFixed} post(s).`, 'Backfill complete');
+    } catch { toast.error('Backfill failed. Make sure auth-service is running.'); }
+    finally { setBackfilling(false); }
   };
 
   if (loading) return <div className="loader"><div className="spinner" /></div>;
@@ -178,10 +233,10 @@ export default function AdminPanel() {
           {/* ——— Newsletter ——— */}
           {activeTab === 'newsletter' && (
             <div>
-              <h2 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>Broadcast Newsletter</h2>
-              <div className="card" style={{ maxWidth: '600px' }}>
+              <h2 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>{editingCampaignId ? 'Edit Newsletter' : 'Broadcast Newsletter'}</h2>
+              <div className="card" style={{ maxWidth: '600px', marginBottom: '2rem' }}>
                 <p style={{ color: 'var(--color-text-3)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                  Send an email update to all confirmed subscribers.
+                  {editingCampaignId ? 'Update this past broadcast content.' : 'Send an email update to all confirmed subscribers.'}
                 </p>
                 <div className="form-group">
                   <label className="form-label">Subject Line</label>
@@ -193,11 +248,46 @@ export default function AdminPanel() {
                   <textarea className="form-input" rows={8} placeholder="Enter your email content here…"
                     value={newsletterContent} onChange={e => setNewsletterContent(e.target.value)} />
                 </div>
-                <button className="btn btn-primary btn-pill" onClick={sendNewsletter}
-                  disabled={!newsletterSubject || !newsletterContent}>
-                  <Send size={16} /> Send Broadcast
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button className="btn btn-primary btn-pill" onClick={sendNewsletter}
+                    disabled={!newsletterSubject || !newsletterContent}>
+                    <Send size={16} /> {editingCampaignId ? 'Update Newsletter' : 'Send Broadcast'}
+                  </button>
+                  {editingCampaignId && (
+                    <button className="btn btn-secondary btn-pill" onClick={() => {
+                      setEditingCampaignId(null);
+                      setNewsletterSubject('');
+                      setNewsletterContent('');
+                    }}>
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
+
+              <h3 style={{ fontWeight: 700, marginBottom: '1rem' }}>Past Broadcasts</h3>
+              {campaigns.length === 0 ? (
+                <div className="empty-state" style={{ padding: '2rem' }}>
+                  <p style={{ color: 'var(--color-text-3)' }}>No newsletters have been broadcasted yet.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '800px' }}>
+                  {campaigns.map(c => (
+                    <div key={c.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 600 }}>{c.subject}</h4>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-3)' }}>
+                          Sent on {new Date(c.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleEditCampaign(c)}>Edit</button>
+                        <button className="btn btn-secondary btn-sm" style={{ color: 'var(--color-danger)' }} onClick={() => handleDeleteCampaign(c.id)}>Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -228,6 +318,33 @@ export default function AdminPanel() {
                   Status: <strong style={{ color: moderationRequired ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
                     {moderationRequired ? 'Moderation ON' : 'Auto-approve ON'}
                   </strong>
+                </div>
+              </div>
+
+              {/* Data Repair */}
+              <div style={{ marginTop: '1.5rem' }}>
+                <h3 style={{ fontWeight: 700, marginBottom: '1rem', fontSize: '1rem' }}>Data Repair</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', padding: '1.25rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+                  <div>
+                    <h4 style={{ marginBottom: '0.4rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Wrench size={16} /> Fix Missing Author Names
+                    </h4>
+                    <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--color-text-3)', lineHeight: 1.6 }}>
+                      Backfills <strong>author_name</strong> for any posts where it is blank (created before the JWT name claim fix). Fetches names from auth-service.
+                    </p>
+                  </div>
+                  <button
+                    id="btn-backfill-authors"
+                    className="btn btn-secondary btn-sm btn-pill"
+                    style={{ flexShrink: 0 }}
+                    onClick={handleBackfillAuthors}
+                    disabled={backfilling}
+                  >
+                    {backfilling
+                      ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Running…</>
+                      : <><Wrench size={14} /> Run Backfill</>
+                    }
+                  </button>
                 </div>
               </div>
             </div>

@@ -38,6 +38,16 @@ export const AuthProvider = ({ children }) => {
     return user;
   };
 
+  // Google OAuth — sends the ID token from the Google popup to our backend
+  const googleLogin = async (idToken) => {
+    const response = await api.post('/auth/oauth', { idToken });
+    const { accessToken, user } = response.data;
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('user', JSON.stringify(user));
+    setUser(user);
+    return user;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -50,10 +60,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, updateUser, googleLogin, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+

@@ -1,10 +1,13 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { PenSquare, LogOut, Bell, Menu, X, LayoutDashboard, BookOpen, Users } from 'lucide-react';
+import { PenSquare, LogOut, Bell, Menu, X, LayoutDashboard, BookOpen, Users, Mail } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import ThemeToggle from './ThemeToggle';
 import { useToast } from '../context/ToastContext';
+
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -26,20 +29,45 @@ export default function Navbar() {
   // Close drawer on route change
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
-  // Fetch unread notifications (only when user AND valid token are present)
+  // Fetch unread notifications & set up WebSocket for real-time updates
   useEffect(() => {
-    if (!user) return;
+    if (!user || !user.id) return;
     const token = localStorage.getItem('token');
-    if (!token) return; // Guard: don't fetch if token is gone (e.g. after logout)
+    if (!token) return;
+
+    // 1. Initial fetch
     const fetch = async () => {
       try {
         const res = await api.get('/notifications/unread-count');
         setUnreadCount(res.data.count || 0);
-      } catch {} // Silently ignore — 401 interceptor in api.js handles token expiry
+      } catch {} 
     };
     fetch();
-    const interval = setInterval(fetch, 30000);
-    return () => clearInterval(interval);
+
+    // 2. Setup WebSocket Connection
+    const client = new Client({
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws/notifications'),
+      onConnect: () => {
+        console.log('Connected to real-time notifications');
+        const topic = `/topic/notifications/${user.id}`;
+        console.log('🔔 Subscribing to topic:', topic);
+        client.subscribe(topic, (message) => {
+          console.log('🔔 WS message received:', message.body);
+          if (message.body) {
+            setUnreadCount((prev) => prev + 1);
+          }
+        });
+      },
+      onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+      }
+    });
+
+    client.activate();
+
+    return () => {
+      client.deactivate();
+    };
   }, [user]);
 
   const handleLogout = () => {
@@ -64,6 +92,10 @@ export default function Navbar() {
     <>
       <Link to="/" className={`nav-item ${mobile ? 'w-full' : ''}`} style={mobile ? { padding: '0.875rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem' } : {}}>
         <BookOpen size={16} /> Home
+      </Link>
+      
+      <Link to="/newsletters" className={`nav-item ${mobile ? 'w-full' : ''}`} style={mobile ? { padding: '0.875rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem' } : {}}>
+        <Mail size={16} /> Newsletters
       </Link>
 
       <button onClick={handleWriteClick} className={`nav-item ${mobile ? 'w-full' : ''}`} style={mobile ? { padding: '0.875rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem', width: '100%', textAlign: 'left', justifyContent: 'flex-start' } : {}}>
@@ -140,7 +172,6 @@ export default function Navbar() {
           {/* Desktop links */}
           <div className="nav-links" style={{ gap: '0.2rem' }}>
             <NavLinks />
-            <ThemeToggle />
           </div>
 
           {/* Mobile right side */}

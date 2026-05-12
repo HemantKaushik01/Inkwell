@@ -13,6 +13,7 @@ import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import AuthorProfile from './pages/AuthorProfile';
 import UserProfiles from './pages/UserProfiles';
+import Newsletters from './pages/Newsletters';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path="/profile"        element={<Profile />} />
               <Route path="/author/:id"     element={<AuthorProfile />} />
               <Route path="/user-profiles"  element={<UserProfiles />} />
+              <Route path="/newsletters"    element={<Newsletters />} />
             </Routes>
           </main>
           <footer style={{
