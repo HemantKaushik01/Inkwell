@@ -6,6 +6,9 @@ import api from '../api';
 import ThemeToggle from './ThemeToggle';
 import { useToast } from '../context/ToastContext';
 
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -26,20 +29,45 @@ export default function Navbar() {
   // Close drawer on route change
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
-  // Fetch unread notifications (only when user AND valid token are present)
+  // Fetch unread notifications & set up WebSocket for real-time updates
   useEffect(() => {
-    if (!user) return;
+    if (!user || !user.id) return;
     const token = localStorage.getItem('token');
-    if (!token) return; // Guard: don't fetch if token is gone (e.g. after logout)
+    if (!token) return;
+
+    // 1. Initial fetch
     const fetch = async () => {
       try {
         const res = await api.get('/notifications/unread-count');
         setUnreadCount(res.data.count || 0);
-      } catch {} // Silently ignore — 401 interceptor in api.js handles token expiry
+      } catch {} 
     };
     fetch();
-    const interval = setInterval(fetch, 30000);
-    return () => clearInterval(interval);
+
+    // 2. Setup WebSocket Connection
+    const client = new Client({
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws/notifications'),
+      onConnect: () => {
+        console.log('Connected to real-time notifications');
+        const topic = `/topic/notifications/${user.id}`;
+        console.log('🔔 Subscribing to topic:', topic);
+        client.subscribe(topic, (message) => {
+          console.log('🔔 WS message received:', message.body);
+          if (message.body) {
+            setUnreadCount((prev) => prev + 1);
+          }
+        });
+      },
+      onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+      }
+    });
+
+    client.activate();
+
+    return () => {
+      client.deactivate();
+    };
   }, [user]);
 
   const handleLogout = () => {
