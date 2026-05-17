@@ -1,0 +1,35 @@
+# Compiled class files
+target/
+*.class
+
+# Maven
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.suo
+*.user
+
+# Logs
+logs/
+*.log
+
+# Environment / secrets — NEVER commit these
+.env
+*.env
+
+# Docker
+mysql-data/
+media-uploads/
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db

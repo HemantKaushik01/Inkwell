@@ -1,0 +1,67 @@
+# ============================================================
+# render.yaml — InkWell Auth Deployment on Render
+# Deploys: eureka-server | api-gateway | auth-service
+#
+# After pushing this to GitHub, go to:
+#   https://dashboard.render.com → New → Blueprint
+#   and connect your repository.
+#
+# IMPORTANT: Set these secret env vars manually in Render dashboard
+#   after the first deploy (marked with generateValue: false):
+#   - JWT_SECRET
+#   - SPRING_DATASOURCE_URL  (Railway JDBC URL)
+#   - SPRING_DATASOURCE_USERNAME
+#   - SPRING_DATASOURCE_PASSWORD
+# ============================================================
+
+services:
+
+  # ── 1. Eureka Service Discovery ──────────────────────────
+  - name: inkwell-eureka
+    type: web
+    plan: free
+    rootDir: eureka-server
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/eureka-server-1.0.0.jar
+    healthCheckPath: /eureka/
+    autoDeploy: true
+
+  # ── 2. API Gateway ───────────────────────────────────────
+  - name: inkwell-api-gateway
+    type: web
+    plan: free
+    rootDir: api-gateway
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/api-gateway-1.0.0.jar
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: https://inkwell-eureka.onrender.com/eureka/
+      - key: JWT_SECRET
+        sync: false   # Set this manually in Render Dashboard
+
+  # ── 3. Auth Service ───────────────────────────────────────
+  - name: inkwell-auth-service
+    type: web
+    plan: free
+    rootDir: auth-service
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/auth-service-1.0.0.jar
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: https://inkwell-eureka.onrender.com/eureka/
+      - key: SPRING_DATASOURCE_URL
+        sync: false   # Set this manually — your Railway JDBC URL
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false   # Set this manually — your Railway MySQL user
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false   # Set this manually — your Railway MySQL password
+      - key: JWT_SECRET
+        sync: false   # Set this manually — must match api-gateway
+      - key: GOOGLE_CLIENT_ID
+        value: 622463594939-750rrmeh25q2apo9knkeq42qhrf5c8u9.apps.googleusercontent.com

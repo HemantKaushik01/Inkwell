@@ -1,0 +1,15 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+logs/
+*.log
+.git/
+.idea/
+.vscode/
+*.iml
+*.ps1
+docker-compose.override.yml
+.env
+mysql-data/
+media-uploads/
+node_modules/
+dist/

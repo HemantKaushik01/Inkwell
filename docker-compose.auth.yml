@@ -1,0 +1,62 @@
+# ============================================================
+# docker-compose.auth.yml — Deploy ONLY these 3 services:
+#   1. eureka-server  (port 8761)
+#   2. api-gateway    (port 8080)
+#   3. auth-service   (port 8081)
+#
+# Requires a .env file in this directory. Copy .env.example:
+#   Copy-Item .env.example .env
+# Then fill in your Railway MySQL credentials.
+#
+# Run with:
+#   docker-compose -f docker-compose.auth.yml up --build -d
+#
+# Stop with:
+#   docker-compose -f docker-compose.auth.yml down
+# ============================================================
+
+services:
+
+  # ── 1. Eureka Service Discovery ──────────────────────────
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── 2. API Gateway ───────────────────────────────────────
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  # ── 3. Auth Service (connects to Railway MySQL) ──────────
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_AUTH}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+    depends_on:
+      eureka-server:
+        condition: service_healthy

@@ -1,0 +1,169 @@
+version: '3.8'
+
+# ============================================================
+# PRODUCTION docker-compose.yml
+# Uses Railway MySQL — set these environment variables before running:
+#
+#   RAILWAY_MYSQL_URL_AUTH       = jdbc:mysql://<host>:<port>/inkwell_auth?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#   RAILWAY_MYSQL_URL_POSTS      = jdbc:mysql://<host>:<port>/inkwell_posts?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#   RAILWAY_MYSQL_URL_COMMENTS   = jdbc:mysql://<host>:<port>/inkwell_comments?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#   RAILWAY_MYSQL_URL_CATEGORIES = jdbc:mysql://<host>:<port>/inkwell_categories?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#   RAILWAY_MYSQL_URL_MEDIA      = jdbc:mysql://<host>:<port>/inkwell_media?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#   RAILWAY_MYSQL_URL_NEWSLETTER = jdbc:mysql://<host>:<port>/inkwell_newsletter?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#   RAILWAY_MYSQL_URL_NOTIF      = jdbc:mysql://<host>:<port>/inkwell_notifications?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#   RAILWAY_MYSQL_USER           = <your-railway-user>
+#   RAILWAY_MYSQL_PASSWORD       = <your-railway-password>
+# ============================================================
+
+services:
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWEDORIGINS=*
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_AUTH}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  post-service:
+    build: ./post-service
+    container_name: post-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_POSTS}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  comment-service:
+    build: ./comment-service
+    container_name: comment-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_COMMENTS}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  category-tag-service:
+    build: ./category-tag-service
+    container_name: category-tag-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_CATEGORIES}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  media-service:
+    build: ./media-service
+    container_name: media-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_MEDIA}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - FILE_UPLOAD_DIR=/app/uploads
+    volumes:
+      - ./media-uploads:/app/uploads
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  newsletter-service:
+    build: ./newsletter-service
+    container_name: newsletter-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_NEWSLETTER}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=${RAILWAY_MYSQL_URL_NOTIF}
+      - SPRING_DATASOURCE_USERNAME=${RAILWAY_MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${RAILWAY_MYSQL_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: inkwell-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - api-gateway
