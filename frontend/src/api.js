@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// In production (Render), VITE_API_BASE_URL points to the deployed API Gateway.
+// In local development, it falls back to localhost:8080.
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Gateway URL
+  baseURL: BASE_URL,
 });
 
 // Attach JWT token to every request
