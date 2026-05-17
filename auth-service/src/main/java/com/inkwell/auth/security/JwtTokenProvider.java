@@ -27,10 +27,13 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(String userId, String email, String role) {
+    public String generateAccessToken(String userId, String email, String role, String fullName) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
         claims.put("role", role);
+        if (fullName != null && !fullName.isBlank()) {
+            claims.put("name", fullName);
+        }
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userId)

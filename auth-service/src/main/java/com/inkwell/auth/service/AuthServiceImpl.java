@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.inkwell.auth.dto.*;
 import com.inkwell.auth.entity.User;
 import com.inkwell.auth.repository.UserRepository;
+import com.inkwell.auth.client.NotificationServiceClient;
 import com.inkwell.auth.security.GoogleTokenVerifier;
 import com.inkwell.auth.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final GoogleTokenVerifier googleTokenVerifier;
+    private final NotificationServiceClient notificationServiceClient;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -107,6 +109,20 @@ public class AuthServiceImpl implements AuthService {
         User target = findById(targetId);
         follower.getFollowing().add(target);
         userRepository.save(follower);
+        
+        try {
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+            payload.put("recipientId", targetId);
+            payload.put("actorId", followerId);
+            payload.put("type", "NEW_FOLLOWER");
+            payload.put("title", "New Follower");
+            payload.put("message", follower.getUsername() + " started following you!");
+            payload.put("relatedId", followerId);
+            payload.put("relatedType", "USER");
+            notificationServiceClient.sendNotification(payload);
+        } catch (Exception e) {
+            // log the error and continue
+        }
     }
 
     @Override
@@ -280,7 +296,7 @@ public class AuthServiceImpl implements AuthService {
 
     private AuthResponse buildAuthResponse(User user) {
         String accessToken = jwtTokenProvider.generateAccessToken(
-                String.valueOf(user.getId()), user.getEmail(), user.getRole().name());
+                String.valueOf(user.getId()), user.getEmail(), user.getRole().name(), user.getFullName());
         String refreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(user.getId()));
         return AuthResponse.builder()
                 .accessToken(accessToken)

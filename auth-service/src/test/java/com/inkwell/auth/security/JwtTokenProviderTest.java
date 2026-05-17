@@ -25,7 +25,9 @@ class JwtTokenProviderTest {
         String email = "test@example.com";
         String role = "READER";
 
-        String token = jwtTokenProvider.generateAccessToken(userId, email, role);
+        String fullName = "Test User";
+
+        String token = jwtTokenProvider.generateAccessToken(userId, email, role, fullName);
 
         assertNotNull(token);
         assertTrue(jwtTokenProvider.isTokenValid(token));
@@ -34,6 +36,7 @@ class JwtTokenProviderTest {
         Claims claims = jwtTokenProvider.validateToken(token);
         assertEquals(email, claims.get("email"));
         assertEquals(role, claims.get("role"));
+        assertEquals(fullName, claims.get("name"));
     }
 
     @Test

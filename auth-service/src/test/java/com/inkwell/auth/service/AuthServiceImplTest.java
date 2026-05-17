@@ -61,7 +61,7 @@ class AuthServiceImplTest {
         when(userRepository.existsByUsername(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(testUser);
-        when(jwtTokenProvider.generateAccessToken(anyString(), anyString(), anyString())).thenReturn("access-token");
+        when(jwtTokenProvider.generateAccessToken(anyString(), anyString(), anyString(), anyString())).thenReturn("access-token");
         when(jwtTokenProvider.generateRefreshToken(anyString())).thenReturn("refresh-token");
 
         AuthResponse response = authService.register(request);
@@ -89,7 +89,7 @@ class AuthServiceImplTest {
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(jwtTokenProvider.generateAccessToken(anyString(), anyString(), anyString())).thenReturn("access-token");
+        when(jwtTokenProvider.generateAccessToken(anyString(), anyString(), anyString(), anyString())).thenReturn("access-token");
         when(jwtTokenProvider.generateRefreshToken(anyString())).thenReturn("refresh-token");
 
         AuthResponse response = authService.login(request);
