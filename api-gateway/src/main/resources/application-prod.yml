@@ -132,13 +132,13 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
   instance:
     prefer-ip-address: true
 
 jwt:
-  secret: inkwell-super-secret-jwt-key-must-be-256-bits-long-here
+  secret: ${JWT_SECRET:inkwell-super-secret-jwt-key-must-be-256-bits-long-here}
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
