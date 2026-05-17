@@ -19,7 +19,9 @@ logs/
 
 # Environment / secrets — NEVER commit these
 .env
-*.env
+.env.local
+.env.*.local
+# NOTE: .env.production is intentionally tracked (contains public Vite build-time vars)
 
 # Docker
 mysql-data/
@@ -29,6 +31,10 @@ media-uploads/
 node_modules/
 dist/
 build/
+.scannerwork/
+
+# Misc
+pdf_text.txt
 
 # OS
 .DS_Store
